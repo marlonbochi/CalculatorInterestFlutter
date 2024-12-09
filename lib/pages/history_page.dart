@@ -90,7 +90,8 @@ class _HistoryPageWidgetState extends State<HistoryPageWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(8.0, 14.0, 8.0, 0.0),
                   child: FlutterFlowDataTable<dynamic>(
                     controller: _model.paginatedDataTableController,
-                    data: paginatedDataTableRecordList,
+                    // data: paginatedDataTableRecordList,
+                    data: [],
                     columnsBuilder: (onSortChanged) => [
                       DataColumn2(
                         label: DefaultTextStyle.merge(
