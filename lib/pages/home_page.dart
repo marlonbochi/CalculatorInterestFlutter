@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
+import '/functions/flutter_flow_theme.dart';
 
-import '/model/home_page_model.dart';
-export '/model/home_page_model.dart';
+import '../models/home_page_model.dart';
+export '../models/home_page_model.dart';
 
 class HomePageWidget extends StatefulWidget {
   const HomePageWidget({super.key});

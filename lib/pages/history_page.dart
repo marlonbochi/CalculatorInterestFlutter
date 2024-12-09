@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '/model/history_page_model.dart';
-export '/model/history_page_model.dart';
+import '../models/history_page_model.dart';
+export '../models/history_page_model.dart';
+
+import '/functions/flutter_flow_theme.dart';
 
 class HistoryPageWidget extends StatefulWidget {
   const HistoryPageWidget({super.key});
