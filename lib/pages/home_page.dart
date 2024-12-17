@@ -26,6 +26,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   final dbHelper = DatabaseHelper();
 
+  final List<DataRow> rows = <DataRow>[];
+
   void initDatabase(String deposit, String interest, String months) async {
     // Insert an item
     await dbHelper.insertItem(deposit, interest, months);
@@ -463,139 +465,52 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       child: Padding(
                         padding:
                             EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
-                        child: FlutterFlowDataTable<dynamic>(
-                          controller: _model.paginatedDataTableController,
-                          // data: paginatedDataTableRecordList,
-                          data: [],
-                          columnsBuilder: (onSortChanged) => [
-                            DataColumn2(
-                              label: DefaultTextStyle.merge(
-                                softWrap: true,
-                                child: Text(
-                                  'Mês',
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelLarge
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            DataColumn2(
-                              label: DefaultTextStyle.merge(
-                                softWrap: true,
-                                child: Text(
-                                  'Anterior',
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelLarge
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            DataColumn2(
-                              label: DefaultTextStyle.merge(
-                                softWrap: true,
-                                child: Text(
-                                  'Add',
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelLarge
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            DataColumn2(
-                              label: DefaultTextStyle.merge(
-                                softWrap: true,
-                                child: Text(
-                                  'Novo',
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelLarge
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ],
-                          dataRowBuilder: (Item, paginatedDataTableIndex,
-                                  selected, onSelectChanged) =>
-                              DataRow(
-                            color: MaterialStateProperty.all(
-                              paginatedDataTableIndex % 2 == 0
-                                  ? FlutterFlowTheme.of(context)
-                                      .secondaryBackground
-                                  : FlutterFlowTheme.of(context)
-                                      .primaryBackground,
-                            ),
-                            cells: [
-                              Text(
-                                'Edit Column 1',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                              Text(
-                                'Edit Column 2',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                              Text(
-                                'Edit Column 3',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                              Text(
-                                'Edit Column 4',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                            ].map((c) => DataCell(c)).toList(),
-                          ),
-                          paginated: false,
-                          selectable: false,
-                          headingRowHeight: 56.0,
-                          dataRowHeight: 48.0,
-                          columnSpacing: 10.0,
-                          headingRowColor: FlutterFlowTheme.of(context).primary,
-                          borderRadius: BorderRadius.circular(8.0),
-                          addHorizontalDivider: true,
-                          addTopAndBottomDivider: false,
-                          hideDefaultHorizontalDivider: true,
-                          horizontalDividerColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          horizontalDividerThickness: 1.0,
-                          addVerticalDivider: false,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: DataTable(
+                            columnSpacing: 16,
+                            dataRowMinHeight: 45,
+                            headingRowColor: WidgetStateColor.resolveWith(
+                                (states) => FlutterFlowTheme.of(context)
+                                    .secondaryBackground),
+                            columns: const <DataColumn>[
+                              DataColumn(
+                                  label: Text('Mês',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter'))),
+                              DataColumn(
+                                  label: Text('Anterior',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter'))),
+                              DataColumn(
+                                  label: Text('Add',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter'))),
+                              DataColumn(
+                                  label: Text('Novo',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter'))),
+                            ],
+                            rows: rows.isNotEmpty
+                                ? rows
+                                : const <DataRow>[
+                                    DataRow(cells: <DataCell>[
+                                      DataCell(Text('Row 1 Column 1')),
+                                      DataCell(Text('Row 1 Column 2')),
+                                      DataCell(Text('Row 1 Column 1')),
+                                      DataCell(Text('Row 1 Column 2')),
+                                    ]),
+                                    DataRow(cells: <DataCell>[
+                                      DataCell(Text('Row 2 Column 1')),
+                                      DataCell(Text('Row 2 Column 2')),
+                                      DataCell(Text('Row 2 Column 1')),
+                                      DataCell(Text('Row 2 Column 2')),
+                                    ]),
+                                  ]),
                         ),
                       ),
                     ),
