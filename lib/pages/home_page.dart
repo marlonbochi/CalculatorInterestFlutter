@@ -433,9 +433,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             child: Padding(
                               padding: EdgeInsets.all(14.0),
                               child: FFButtonWidget(
-                                onPressed: () {
-                                  print('Button pressed ...');
-                                },
+                                onPressed: calculateInterests,
                                 text: 'Calcular',
                                 options: FFButtonOptions(
                                   width: double.infinity,
@@ -468,49 +466,49 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         child: SizedBox(
                           width: double.infinity,
                           child: DataTable(
-                            columnSpacing: 16,
-                            dataRowMinHeight: 45,
-                            headingRowColor: WidgetStateColor.resolveWith(
-                                (states) => FlutterFlowTheme.of(context)
-                                    .secondaryBackground),
-                            columns: const <DataColumn>[
-                              DataColumn(
-                                  label: Text('Mês',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Inter'))),
-                              DataColumn(
-                                  label: Text('Anterior',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Inter'))),
-                              DataColumn(
-                                  label: Text('Add',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Inter'))),
-                              DataColumn(
-                                  label: Text('Novo',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Inter'))),
-                            ],
-                            rows: rows.isNotEmpty
-                                ? rows
-                                : const <DataRow>[
-                                    DataRow(cells: <DataCell>[
-                                      DataCell(Text('Row 1 Column 1')),
-                                      DataCell(Text('Row 1 Column 2')),
-                                      DataCell(Text('Row 1 Column 1')),
-                                      DataCell(Text('Row 1 Column 2')),
+                              columnSpacing: 16,
+                              dataRowMinHeight: 45,
+                              headingRowColor: WidgetStateColor.resolveWith(
+                                  (states) => FlutterFlowTheme.of(context)
+                                      .secondaryBackground),
+                              columns: const <DataColumn>[
+                                DataColumn(
+                                    label: Text('Mês',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter'))),
+                                DataColumn(
+                                    label: Text('Anterior',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter'))),
+                                DataColumn(
+                                    label: Text('Add',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter'))),
+                                DataColumn(
+                                    label: Text('Novo',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter'))),
+                              ],
+                              rows: rows.isNotEmpty
+                                  ? rows
+                                  : const <DataRow>[
+                                      DataRow(cells: <DataCell>[
+                                        DataCell(Text('Row 1 Column 1')),
+                                        DataCell(Text('Row 1 Column 2')),
+                                        DataCell(Text('Row 1 Column 1')),
+                                        DataCell(Text('Row 1 Column 2')),
+                                      ]),
+                                      DataRow(cells: <DataCell>[
+                                        DataCell(Text('Row 2 Column 1')),
+                                        DataCell(Text('Row 2 Column 2')),
+                                        DataCell(Text('Row 2 Column 1')),
+                                        DataCell(Text('Row 2 Column 2')),
+                                      ]),
                                     ]),
-                                    DataRow(cells: <DataCell>[
-                                      DataCell(Text('Row 2 Column 1')),
-                                      DataCell(Text('Row 2 Column 2')),
-                                      DataCell(Text('Row 2 Column 1')),
-                                      DataCell(Text('Row 2 Column 2')),
-                                    ]),
-                                  ]),
                         ),
                       ),
                     ),
