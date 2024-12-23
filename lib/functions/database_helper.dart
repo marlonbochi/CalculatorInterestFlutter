@@ -44,11 +44,16 @@ class DatabaseHelper {
   }
 
   // Insert Data
-  Future<int> insertItem(String desposit, String interest, String months) async {
+  Future<int> insertItem(
+      String desposit, String interest, String months) async {
     final db = await database;
     return await db.insert(
       tableName,
-      {columnDesposit: desposit, columnInterest: interest, columnMonths: months},
+      {
+        columnDesposit: desposit,
+        columnInterest: interest,
+        columnMonths: months
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -60,11 +65,16 @@ class DatabaseHelper {
   }
 
   // Update Data
-  Future<int> updateItem(int id, String desposit, String interest, String months) async {
+  Future<int> updateItem(
+      int id, String desposit, String interest, String months) async {
     final db = await database;
     return await db.update(
       tableName,
-      {columnDesposit: desposit, columnInterest: interest, columnMonths: months},
+      {
+        columnDesposit: desposit,
+        columnInterest: interest,
+        columnMonths: months
+      },
       where: '$columnId = ?',
       whereArgs: [id],
     );
@@ -78,6 +88,11 @@ class DatabaseHelper {
       where: '$columnId = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<void> deleteAllItems() async {
+    final db = await database;
+    await db.delete(tableName);
   }
 
   // Close Database

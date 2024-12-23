@@ -1,9 +1,7 @@
 import 'package:calculadora_de_juros/pages/history_page.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:provider/provider.dart';
 import '/functions/flutter_flow_theme.dart';
 
 import '../models/home_page_model.dart';
@@ -50,7 +48,48 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   void calculateInterests() async {
-    initDatabase("", "", "");
+    // Get values from text controllers
+    String deposit =
+        _model.textMoneyController?.text.replaceAll(RegExp(r'[^\d]'), '') ??
+            '0';
+    String interest = _model.textInterestController.text;
+    String months = _model.textMonthsController.text;
+
+    // Validate inputs
+    if (deposit.isEmpty || interest.isEmpty || months.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha todos os campos'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Convert deposit from cents to real value
+      deposit = (double.parse(deposit) / 100).toString();
+
+      // Store values in database
+      await dbHelper.insertItem(deposit, interest, months);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cálculo salvo com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar o cálculo'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('Error saving to database: $e');
+    }
   }
 
   @override
@@ -58,13 +97,43 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     super.initState();
     _model = createModel(context, () => HomePageModel());
 
-    _model.textController1 ??= TextEditingController();
+    _model.textMoneyController ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
 
-    _model.textController2 ??= TextEditingController();
+    // Add listener for currency formatting
+    _model.textMoneyController?.addListener(() {
+      String text = _model.textMoneyController?.text ?? '';
+      text = text.replaceAll(RegExp(r'[^\d]'), '');
+
+      if (text.isNotEmpty) {
+        double value = double.parse(text) / 100;
+        _model.textMoneyController?.value = TextEditingValue(
+          text: 'R\$ ${value.toStringAsFixed(2)}',
+          selection: TextSelection.collapsed(
+              offset: value.toStringAsFixed(2).length + 3),
+        );
+      }
+    });
+
+    _model.textInterestController ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
 
-    _model.textController3 ??= TextEditingController();
+    // Add listener for interest percentage formatting
+    _model.textInterestController?.addListener(() {
+      String text =
+          _model.textInterestController!.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (text.isNotEmpty) {
+        double value = double.parse(text);
+        if (value > 100) value = 100;
+        _model.textInterestController?.value = TextEditingValue(
+          text: '$value%',
+          selection:
+              TextSelection.collapsed(offset: value.toString().length + 1),
+        );
+      }
+    });
+
+    _model.textMonthsController ??= TextEditingController();
     _model.textFieldFocusNode3 ??= FocusNode();
   }
 
@@ -79,6 +148,45 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void clearHistory() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar exclusão'),
+          content:
+              const Text('Tem certeza que deseja apagar todo o histórico?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await dbHelper.deleteAllItems();
+      setState(() {
+        rows.clear();
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Histórico apagado com sucesso!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -105,9 +213,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: FFButtonWidget(
-                      onPressed: () {
-                        print('Button pressed ...');
-                      },
+                      onPressed: clearHistory,
                       text: 'Limpar',
                       options: FFButtonOptions(
                         height: 40.0,
@@ -166,68 +272,61 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             child: Container(
                               width: 200.0,
                               child: TextFormField(
-                                controller: _model.textController1,
+                                controller: _model.textMoneyController,
                                 focusNode: _model.textFieldFocusNode1,
                                 autofocus: false,
                                 obscureText: false,
                                 decoration: InputDecoration(
-                                  isDense: true,
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
+                                  labelStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
+                                  hintStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   errorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedErrorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
                                   fillColor: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
+                                  contentPadding:
+                                      EdgeInsetsDirectional.fromSTEB(
+                                          16.0, 12.0, 16.0, 12.0),
                                 ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
+                                style: FlutterFlowTheme.of(context).bodyMedium,
                                 keyboardType: TextInputType.number,
                                 cursorColor:
                                     FlutterFlowTheme.of(context).primaryText,
-                                validator: _model.textController1Validator
+                                validator: _model.textMoneyControllerValidator
                                     .asValidator(context),
-                                inputFormatters: [_model.textFieldMask1],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                               ),
                             ),
                           ),
@@ -262,67 +361,62 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             child: Container(
                               width: 200.0,
                               child: TextFormField(
-                                controller: _model.textController2,
+                                controller: _model.textInterestController,
                                 focusNode: _model.textFieldFocusNode2,
                                 autofocus: false,
                                 obscureText: false,
                                 decoration: InputDecoration(
-                                  isDense: true,
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
+                                  labelStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
+                                  hintStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   errorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedErrorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
                                   fillColor: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
+                                  contentPadding:
+                                      EdgeInsetsDirectional.fromSTEB(
+                                          16.0, 12.0, 16.0, 12.0),
                                 ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
+                                style: FlutterFlowTheme.of(context).bodyMedium,
                                 keyboardType: TextInputType.number,
                                 cursorColor:
                                     FlutterFlowTheme.of(context).primaryText,
-                                validator: _model.textController2Validator
+                                validator: _model
+                                    .textInterestControllerValidator
                                     .asValidator(context),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                               ),
                             ),
                           ),
@@ -357,67 +451,62 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             child: Container(
                               width: 200.0,
                               child: TextFormField(
-                                controller: _model.textController3,
+                                controller: _model.textMonthsController,
                                 focusNode: _model.textFieldFocusNode3,
                                 autofocus: false,
                                 obscureText: false,
                                 decoration: InputDecoration(
-                                  isDense: true,
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
+                                  labelStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
+                                  hintStyle:
+                                      FlutterFlowTheme.of(context).labelMedium,
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   errorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedErrorBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
+                                      width: 2.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
                                   fillColor: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
+                                  contentPadding:
+                                      EdgeInsetsDirectional.fromSTEB(
+                                          16.0, 12.0, 16.0, 12.0),
                                 ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      letterSpacing: 0.0,
-                                    ),
+                                style: FlutterFlowTheme.of(context).bodyMedium,
                                 keyboardType: TextInputType.number,
                                 cursorColor:
                                     FlutterFlowTheme.of(context).primaryText,
-                                validator: _model.textController3Validator
+                                validator: _model.textMonthsControllerValidator
                                     .asValidator(context),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(3),
+                                ],
                               ),
                             ),
                           ),

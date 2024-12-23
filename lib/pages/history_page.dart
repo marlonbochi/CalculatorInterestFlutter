@@ -2,6 +2,7 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../functions/database_helper.dart';
 
 import '../models/history_page_model.dart';
 export '../models/history_page_model.dart';
@@ -17,20 +18,41 @@ class HistoryPageWidget extends StatefulWidget {
 
 class _HistoryPageWidgetState extends State<HistoryPageWidget> {
   late HistoryPageModel _model;
-
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final List<DataRow> rows = [];
+  List<DataRow> rows = [];
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => HistoryPageModel());
+    _loadHistoryData();
+  }
+
+  Future<void> _loadHistoryData() async {
+    final items = await _databaseHelper.getAllItems();
+    setState(() {
+      rows = items.map((item) {
+        final deposit = double.parse(item['deposit']);
+        final interest = double.parse(item['interest']);
+        final months = int.parse(item['months']);
+        final newValue = deposit * (1 + (interest / 100)) * months;
+
+        return DataRow(
+          cells: <DataCell>[
+            DataCell(Text(months.toString())),
+            DataCell(Text(deposit.toStringAsFixed(2))),
+            DataCell(Text('${interest.toString()}%')),
+            DataCell(Text(newValue.toStringAsFixed(2))),
+          ],
+        );
+      }).toList();
+    });
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -78,22 +100,17 @@ class _HistoryPageWidgetState extends State<HistoryPageWidget> {
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'Inter'))),
                       ],
-                      rows: rows.isNotEmpty
-                          ? rows
-                          : const <DataRow>[
-                              DataRow(cells: <DataCell>[
-                                DataCell(Text('Row 1 Column 1')),
-                                DataCell(Text('Row 1 Column 2')),
-                                DataCell(Text('Row 1 Column 1')),
-                                DataCell(Text('Row 1 Column 2')),
-                              ]),
-                              DataRow(cells: <DataCell>[
-                                DataCell(Text('Row 2 Column 1')),
-                                DataCell(Text('Row 2 Column 2')),
-                                DataCell(Text('Row 2 Column 1')),
-                                DataCell(Text('Row 2 Column 2')),
-                              ]),
-                            ]),
+                      rows: rows.isEmpty
+                          ? [
+                              const DataRow(cells: <DataCell>[
+                                DataCell(Text('-')),
+                                DataCell(Text('-')),
+                                DataCell(Text('-')),
+                                DataCell(Text('-')),
+                              ])
+                            ]
+                          : rows,
+                    ),
                   ),
                 ),
               ),

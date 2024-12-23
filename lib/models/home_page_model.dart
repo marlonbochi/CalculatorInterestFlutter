@@ -10,17 +10,16 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
 
   // State field(s) for TextField widget.
   FocusNode? textFieldFocusNode1;
-  TextEditingController? textController1;
-  final textFieldMask1 = MaskTextInputFormatter(mask: 'R\$ #########,##');
-  String? Function(BuildContext, String?)? textController1Validator;
+  TextEditingController? textMoneyController;
+  String? Function(BuildContext, String?)? textMoneyControllerValidator;
   // State field(s) for TextField widget.
   FocusNode? textFieldFocusNode2;
-  TextEditingController? textController2;
-  String? Function(BuildContext, String?)? textController2Validator;
+  TextEditingController? textInterestController;
+  String? Function(BuildContext, String?)? textInterestControllerValidator;
   // State field(s) for TextField widget.
   FocusNode? textFieldFocusNode3;
-  TextEditingController? textController3;
-  String? Function(BuildContext, String?)? textController3Validator;
+  TextEditingController? textMonthsController;
+  String? Function(BuildContext, String?)? textMonthsControllerValidator;
   // State field(s) for PaginatedDataTable widget.
   final paginatedDataTableController =
       FlutterFlowDataTableController<dynamic>();
@@ -31,13 +30,13 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
   @override
   void dispose() {
     textFieldFocusNode1?.dispose();
-    textController1?.dispose();
+    textMoneyController?.dispose();
 
     textFieldFocusNode2?.dispose();
-    textController2?.dispose();
+    textInterestController?.dispose();
 
     textFieldFocusNode3?.dispose();
-    textController3?.dispose();
+    textMonthsController?.dispose();
 
     paginatedDataTableController.dispose();
   }
