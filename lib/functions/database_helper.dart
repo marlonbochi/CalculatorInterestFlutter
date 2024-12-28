@@ -1,5 +1,8 @@
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -19,6 +22,9 @@ class DatabaseHelper {
   // Initialize Database
   Future<Database> get database async {
     if (_database != null) return _database!;
+
+    databaseFactory = databaseFactoryFfiWeb;
+
     _database = await _initDatabase();
     return _database!;
   }
@@ -32,13 +38,13 @@ class DatabaseHelper {
       version: 1,
       onCreate: (db, version) {
         db.execute('''
-          CREATE TABLE $tableName (
-            $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
-            $columnDesposit TEXT NOT NULL,
-            $columnInterest TEXT NOT NULL,
-            $columnMonths TEXT NOT NULL
-          )
-        ''');
+					CREATE TABLE $tableName (
+						$columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+						$columnDesposit TEXT NOT NULL,
+						$columnInterest TEXT NOT NULL,
+						$columnMonths TEXT NOT NULL
+					)
+				''');
       },
     );
   }

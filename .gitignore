@@ -3,3 +3,7 @@
 /.flutter-plugins
 /.DS_Store
 build
+linux
+windows
+macos
+web

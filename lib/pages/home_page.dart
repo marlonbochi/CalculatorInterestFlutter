@@ -24,7 +24,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   final dbHelper = DatabaseHelper();
 
-  final List<DataRow> rows = <DataRow>[];
+  final List<DataRow> rows = [];
 
   void initDatabase(String deposit, String interest, String months) async {
     // Insert an item
@@ -582,22 +582,16 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Inter'))),
                               ],
-                              rows: rows.isNotEmpty
-                                  ? rows
-                                  : const <DataRow>[
-                                      DataRow(cells: <DataCell>[
-                                        DataCell(Text('Row 1 Column 1')),
-                                        DataCell(Text('Row 1 Column 2')),
-                                        DataCell(Text('Row 1 Column 1')),
-                                        DataCell(Text('Row 1 Column 2')),
-                                      ]),
-                                      DataRow(cells: <DataCell>[
-                                        DataCell(Text('Row 2 Column 1')),
-                                        DataCell(Text('Row 2 Column 2')),
-                                        DataCell(Text('Row 2 Column 1')),
-                                        DataCell(Text('Row 2 Column 2')),
-                                      ]),
-                                    ]),
+                              rows: rows.isEmpty
+                                  ? [
+                                      const DataRow(cells: <DataCell>[
+                                        DataCell(Text('-')),
+                                        DataCell(Text('-')),
+                                        DataCell(Text('-')),
+                                        DataCell(Text('-')),
+                                      ])
+                                    ]
+                                  : rows),
                         ),
                       ),
                     ),
