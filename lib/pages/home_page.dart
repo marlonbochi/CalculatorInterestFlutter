@@ -66,29 +66,55 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       return;
     }
 
-    try {
-      // Convert deposit from cents to real value
-      deposit = (double.parse(deposit) / 100).toString();
+    // try {
+    //   // Convert deposit from cents to real value
+    //   deposit = (double.parse(deposit) / 100).toString();
 
-      // Store values in database
-      await dbHelper.insertItem(deposit, interest, months);
+    //   // Store values in database
+    //   await dbHelper.insertItem(deposit, interest, months);
 
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cálculo salvo com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      // Show error message if something goes wrong
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao salvar o cálculo'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      print('Error saving to database: $e');
+    //   // Show success message
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Cálculo salvo com sucesso!'),
+    //       backgroundColor: Colors.green,
+    //     ),
+    //   );
+    // } catch (e) {
+    //   // Show error message if something goes wrong
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Erro ao salvar o cálculo'),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    //   print('Error saving to database: $e');
+    // }
+
+    double oldValue = double.parse(
+        _model.textMoneyController?.text.replaceAll(RegExp(r'[^\d]'), '') ??
+            '0');
+    double newValue = double.parse(
+        _model.textMoneyController?.text.replaceAll(RegExp(r'[^\d]'), '') ??
+            '0');
+
+    for (int i = 0; i < int.parse(months); i++) {
+      double interest =
+          double.parse(_model.textInterestController.text.replaceAll('%', ''));
+
+      double added = (newValue * (interest / 100));
+      newValue = (newValue + added);
+
+      rows.add(DataRow(
+        cells: <DataCell>[
+          DataCell(Text((i + 1).toString())),
+          DataCell(Text((oldValue / 100).toString())),
+          DataCell(Text((added / 100).toString())),
+          DataCell(Text((newValue / 100).toString())),
+        ],
+      ));
+
+      oldValue = newValue;
     }
   }
 
